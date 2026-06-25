@@ -1,16 +1,11 @@
 import React from 'react';
 import { MapPin, Phone, Mail, ChevronRight } from 'lucide-react';
 
-export default function Footer({ data, isEditMode, onUpdateData }) {
+export default function Footer({ data, isEditMode, onUpdateData, onOpenInfo }) {
   
   const handleCareersAlert = (e) => {
     e.preventDefault();
-    window.dispatchEvent(new CustomEvent('viswam_notification', {
-      detail: { 
-        message: "Careers: Please send your resume and qualification credentials to viswamschool2013@gmail.com. Our administrative office will review and get in touch!", 
-        type: 'info' 
-      }
-    }));
+    if (onOpenInfo) onOpenInfo('careers');
   };
 
   return (
@@ -152,9 +147,9 @@ export default function Footer({ data, isEditMode, onUpdateData }) {
           <span>© {new Date().getFullYear()} Viswam English Medium High School. All rights reserved.</span>
         </div>
         <div className="footer-bottom-links">
-          <a href="#" onClick={(e) => { e.preventDefault(); window.dispatchEvent(new CustomEvent('viswam_notification', { detail: { message: "Privacy Policy will be linked in production.", type: 'info' } })); }}>Privacy Policy</a>
-          <a href="#" onClick={(e) => { e.preventDefault(); window.dispatchEvent(new CustomEvent('viswam_notification', { detail: { message: "Terms of Use will be linked in production.", type: 'info' } })); }}>Terms of Use</a>
-          <a href="#" onClick={(e) => { e.preventDefault(); window.dispatchEvent(new CustomEvent('viswam_notification', { detail: { message: "Sitemap will be linked in production.", type: 'info' } })); }}>Sitemap</a>
+          <a href="#" onClick={(e) => { e.preventDefault(); if (onOpenInfo) onOpenInfo('privacy'); }}>Privacy Policy</a>
+          <a href="#" onClick={(e) => { e.preventDefault(); if (onOpenInfo) onOpenInfo('terms'); }}>Terms of Use</a>
+          <a href="#" onClick={(e) => { e.preventDefault(); if (onOpenInfo) onOpenInfo('sitemap'); }}>Sitemap</a>
         </div>
       </div>
     </footer>

@@ -14,6 +14,7 @@ import Gallery from './components/Gallery';
 import Footer from './components/Footer';
 import ContactPage from './components/ContactPage';
 import AdminSettingsModal from './components/AdminSettingsModal';
+import InfoModal from './components/InfoModal';
 
 // Default school data
 const DEFAULT_SCHOOL_DATA = {
@@ -242,6 +243,8 @@ export default function App() {
   const [disclosures, setDisclosures] = useState(DEFAULT_DISCLOSURES);
   const [heroSlides, setHeroSlides] = useState(DEFAULT_HERO_SLIDES);
   const [enquiries, setEnquiries] = useState([]);
+  const [infoModalOpen, setInfoModalOpen] = useState(false);
+  const [infoModalType, setInfoModalType] = useState('privacy');
 
   // Router listening to hash changes
   useEffect(() => {
@@ -756,6 +759,10 @@ export default function App() {
         data={schoolData}
         isEditMode={isEditMode}
         onUpdateData={handleUpdateSchoolData}
+        onOpenInfo={(type) => {
+          setInfoModalType(type);
+          setInfoModalOpen(true);
+        }}
       />
 
       {/* Owner Control Center Dashboard (Enquiries & Security Credentials) */}
@@ -820,6 +827,13 @@ export default function App() {
           </button>
         </div>
       )}
+
+      {/* Info Modal Overlay for sitemap, privacy policy, terms of use, and careers */}
+      <InfoModal
+        isOpen={infoModalOpen}
+        onClose={() => setInfoModalOpen(false)}
+        type={infoModalType}
+      />
     </div>
   );
 }

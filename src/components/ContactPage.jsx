@@ -116,12 +116,7 @@ export default function ContactPage({ data, isEditMode, onUpdateData }) {
           </p>
         </div>
 
-        <div className="contact-grid-layout" style={{
-          display: 'grid',
-          gridTemplateColumns: '1.2fr 1.8fr',
-          gap: '40px',
-          alignItems: 'start'
-        }}>
+        <div className="contact-grid-layout">
 
           {/* Column 1: Info Cards */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>

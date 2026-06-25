@@ -225,30 +225,15 @@ export default function Leadership({ staffList, isEditMode, onUpdateStaff }) {
         )}
 
         {/* Leadership Grid */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: staffList.length === 1 ? '1fr' : 'repeat(auto-fit, minmax(400px, 1fr))',
-          gap: '30px',
-          justifyItems: 'center',
-          marginTop: '30px'
-        }} className="leadership-cards-container">
+        <div className="leadership-cards-container">
           
           {staffList.map((member, index) => (
-            <div key={member.id} style={{
-              display: 'grid',
-              gridTemplateColumns: '200px 1fr',
-              gap: '20px',
-              backgroundColor: 'white',
-              borderRadius: 'var(--radius-lg)',
-              overflow: 'hidden',
-              boxShadow: 'var(--shadow-md)',
-              border: '1px solid var(--border)',
-              padding: '20px',
-              maxWidth: staffList.length === 1 ? '800px' : '550px',
-              width: '100%',
-              position: 'relative',
-              transition: 'transform 0.3s ease, box-shadow 0.3s ease'
-            }} className="leadership-role-card">
+            <div key={member.id} 
+              className="leadership-role-card" 
+              style={{
+                maxWidth: staffList.length === 1 ? '800px' : '550px'
+              }}
+            >
 
               {/* Action: Delete card */}
               {isEditMode && (
@@ -277,16 +262,8 @@ export default function Leadership({ staffList, isEditMode, onUpdateStaff }) {
               )}
 
               {/* Column 1: Image & Role Badge */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center' }}>
-                <div style={{
-                  position: 'relative',
-                  width: '100%',
-                  aspectRatio: '3/4',
-                  borderRadius: 'var(--radius-md)',
-                  overflow: 'hidden',
-                  backgroundColor: '#f1f5f9',
-                  boxShadow: 'var(--shadow-sm)'
-                }}>
+              <div className="leadership-image-col">
+                <div className="leadership-image-wrapper">
                   <img
                     src={member.image || '/principal.png'}
                     alt={member.name}
@@ -361,7 +338,7 @@ export default function Leadership({ staffList, isEditMode, onUpdateStaff }) {
               </div>
 
               {/* Column 2: Text details */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', justifyContent: 'center' }}>
+              <div className="leadership-info-col">
                 <div>
                   <div className={`editable-container ${isEditMode ? 'edit-active' : ''}`} style={{ width: '100%' }}>
                     <span className="edit-indicator">Edit Name</span>

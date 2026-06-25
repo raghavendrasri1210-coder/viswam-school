@@ -1410,3 +1410,112 @@ button {
     opacity: 0;
   }
 }
+
+/* Layout & Squeezing fixes for Contact, Leadership & Disclosures on all viewports */
+
+.contact-grid-layout {
+  display: grid;
+  grid-template-columns: 1.2fr 1.8fr;
+  gap: 40px;
+  align-items: start;
+}
+
+.leadership-cards-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 30px;
+  justify-content: center;
+  margin-top: 30px;
+  width: 100%;
+}
+
+.leadership-role-card {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 25px;
+  background-color: white;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  padding: 25px;
+  box-shadow: var(--shadow-md);
+  position: relative;
+  width: 100%;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.leadership-role-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lg);
+}
+
+.leadership-image-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+}
+
+.leadership-image-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3/4;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background-color: #f1f5f9;
+  box-shadow: var(--shadow-sm);
+}
+
+.leadership-info-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  justify-content: center;
+}
+
+/* Media Queries for Tablet and Mobile viewports */
+
+@media (max-width: 768px) {
+  .contact-grid-layout {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+
+  #disclosures table th {
+    width: auto !important;
+  }
+  
+  #disclosures table th, 
+  #disclosures table td {
+    padding: 12px 14px !important;
+    font-size: 0.85rem !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .leadership-role-card {
+    grid-template-columns: 1fr;
+    padding: 20px;
+    text-align: center;
+  }
+
+  .leadership-image-col {
+    max-width: 200px;
+    margin: 0 auto;
+  }
+
+  .leadership-info-col {
+    align-items: center;
+  }
+
+  .leadership-info-col .editable-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  .leadership-info-col input, 
+  .leadership-info-col textarea {
+    text-align: center;
+  }
+}

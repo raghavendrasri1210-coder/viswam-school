@@ -1490,9 +1490,7 @@ button {
     padding: 12px 14px !important;
     font-size: 0.85rem !important;
   }
-}
 
-@media (max-width: 600px) {
   .leadership-role-card {
     grid-template-columns: 1fr;
     padding: 20px;
@@ -1517,5 +1515,33 @@ button {
   .leadership-info-col input, 
   .leadership-info-col textarea {
     text-align: center;
+  }
+
+  /* Admin Toolbar Responsive Layout styling */
+  .admin-toolbar {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+    padding: 12px 15px;
+    position: relative;
+  }
+
+  .admin-info {
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .admin-actions {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .btn-admin {
+    font-size: 0.78rem !important;
+    padding: 8px 12px !important;
+    flex: 1 1 auto;
+    justify-content: center;
   }
 }

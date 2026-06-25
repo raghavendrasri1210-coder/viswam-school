@@ -33,7 +33,10 @@ const DEFAULT_SCHOOL_DATA = {
 
   principalName: 'Maddela Neeraja',
   principalCredentials: 'M.Sc B.Ed',
-  principalBio: 'Leading our school family with a dedication to bringing out the absolute best in South Indian moral values and world-class educational techniques for every child.'
+  principalBio: 'Leading our school family with a dedication to bringing out the absolute best in South Indian moral values and world-class educational techniques for every child.',
+  
+  careersDesc: 'We are always looking for passionate, experienced, and dedicated teaching professionals to join the Viswam High School family.',
+  careersOpenings: 'Trained Graduate Teachers (TGT) - Science & Mathematics\nPost Graduate Teachers (PGT) - English & Social Sciences\nPrimary Teachers (PRT) & Kindergarten Instructors'
 };
 
 const DEFAULT_STAFF = [
@@ -833,6 +836,9 @@ export default function App() {
         isOpen={infoModalOpen}
         onClose={() => setInfoModalOpen(false)}
         type={infoModalType}
+        isEditMode={isEditMode}
+        schoolData={schoolData}
+        onUpdateSchoolData={handleUpdateSchoolData}
       />
     </div>
   );

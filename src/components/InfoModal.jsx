@@ -1,7 +1,7 @@
 import React from 'react';
 import { X, FileText, ShieldAlert, Map, Briefcase } from 'lucide-react';
 
-export default function InfoModal({ isOpen, onClose, type }) {
+export default function InfoModal({ isOpen, onClose, type, isEditMode, schoolData, onUpdateSchoolData }) {
   if (!isOpen) return null;
 
   const getContent = () => {
@@ -73,20 +73,50 @@ export default function InfoModal({ isOpen, onClose, type }) {
           )
         };
       case 'careers':
+        const desc = schoolData?.careersDesc || 'We are always looking for passionate, experienced, and dedicated teaching professionals to join the Viswam High School family.';
+        const openings = schoolData?.careersOpenings || 'Trained Graduate Teachers (TGT) - Science & Mathematics\nPost Graduate Teachers (PGT) - English & Social Sciences\nPrimary Teachers (PRT) & Kindergarten Instructors';
+
         return {
           icon: <Briefcase size={24} style={{ color: 'var(--primary)' }} />,
           title: 'Careers at Viswam School',
-          body: (
+          body: isEditMode ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', fontSize: '0.9rem', color: 'var(--text-main)' }}>
+              <div>
+                <label className="form-label" style={{ fontWeight: '700', color: 'var(--text-dark)' }}>Careers Introduction Description</label>
+                <textarea
+                  className="form-input"
+                  rows={3}
+                  value={desc}
+                  onChange={(e) => onUpdateSchoolData('careersDesc', e.target.value)}
+                  style={{ width: '100%', fontFamily: 'inherit', marginTop: '5px', padding: '8px' }}
+                />
+              </div>
+              <div>
+                <label className="form-label" style={{ fontWeight: '700', color: 'var(--text-dark)' }}>Active Openings (one per line)</label>
+                <textarea
+                  className="form-input"
+                  rows={4}
+                  value={openings}
+                  onChange={(e) => onUpdateSchoolData('careersOpenings', e.target.value)}
+                  style={{ width: '100%', fontFamily: 'inherit', marginTop: '5px', padding: '8px' }}
+                  placeholder="Enter active job openings..."
+                />
+              </div>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-light)', margin: 0 }}>
+                Note: Candidates will be instructed to email their applications to the configured administrative email address ({schoolData?.contactEmail || 'viswamschool2013@gmail.com'}).
+              </p>
+            </div>
+          ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', fontSize: '0.9rem', lineHeight: '1.6', color: 'var(--text-main)' }}>
-              <p>We are always looking for passionate, experienced, and dedicated teaching professionals to join the Viswam High School family.</p>
+              <p>{desc}</p>
               <h5 style={{ fontWeight: '700', color: 'var(--text-dark)', margin: '5px 0 0 0' }}>Active Openings</h5>
               <ul style={{ paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '5px', listStyleType: 'disc' }}>
-                <li>Trained Graduate Teachers (TGT) - Science & Mathematics</li>
-                <li>Post Graduate Teachers (PGT) - English & Social Sciences</li>
-                <li>Primary Teachers (PRT) & Kindergarten Instructors</li>
+                {openings.split('\n').filter(line => line.trim()).map((line, idx) => (
+                  <li key={idx}>{line}</li>
+                ))}
               </ul>
               <h5 style={{ fontWeight: '700', color: 'var(--text-dark)', margin: '5px 0 0 0' }}>How to Apply</h5>
-              <p>Please send your updated resume, academic credentials, and cover letter directly to our official administrative email address: <a href="mailto:viswamschool2013@gmail.com" style={{ color: 'var(--primary)', fontWeight: '700', textDecoration: 'underline' }}>viswamschool2013@gmail.com</a>.</p>
+              <p>Please send your updated resume, academic credentials, and cover letter directly to our official administrative email address: <a href={`mailto:${schoolData?.contactEmail || 'viswamschool2013@gmail.com'}`} style={{ color: 'var(--primary)', fontWeight: '700', textDecoration: 'underline' }}>{schoolData?.contactEmail || 'viswamschool2013@gmail.com'}</a>.</p>
               <p>Our administrative reviewing desk will evaluate submissions and contact shortlisted candidates for interviews shortly.</p>
             </div>
           )
@@ -100,8 +130,18 @@ export default function InfoModal({ isOpen, onClose, type }) {
 
   return (
     <div className="modal-overlay" onClick={onClose} style={{ zIndex: 1100 }}>
-      <div className="modal-container" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '600px', width: '90%', animation: 'fadeInDown 0.3s ease-out' }}>
-        <button className="modal-close" onClick={onClose}>
+      <div 
+        className="modal-container" 
+        onClick={(e) => e.stopPropagation()} 
+        style={{ 
+          maxWidth: '600px', 
+          width: '90%', 
+          padding: '30px', 
+          position: 'relative',
+          animation: 'fadeInDown 0.3s ease-out' 
+        }}
+      >
+        <button className="modal-close" onClick={onClose} style={{ top: '20px', right: '20px' }}>
           <X size={20} />
         </button>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
@@ -110,7 +150,7 @@ export default function InfoModal({ isOpen, onClose, type }) {
             {data.title}
           </h3>
         </div>
-        <div>
+        <div style={{ maxHeight: '65vh', overflowY: 'auto', paddingRight: '5px' }}>
           {data.body}
         </div>
       </div>

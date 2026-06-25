@@ -300,6 +300,7 @@ async function initializeDatabase() {
 
   } catch (error) {
     console.error('Error during database seeding:', error.message);
+    throw error;
   }
 }
 

@@ -303,8 +303,41 @@ async function initializeDatabase() {
   }
 }
 
-// Run DB init
-initializeDatabase();
+let isDbInitialized = false;
+let dbInitializationPromise = null;
+
+async function ensureDatabaseInitialized() {
+  if (isDbInitialized) return;
+  
+  if (!dbInitializationPromise) {
+    dbInitializationPromise = (async () => {
+      try {
+        await initializeDatabase();
+        isDbInitialized = true;
+        console.log('Neon PostgreSQL database initialization completed successfully.');
+      } catch (err) {
+        dbInitializationPromise = null; // Reset promise so next request can retry
+        throw err;
+      }
+    })();
+  }
+  return dbInitializationPromise;
+}
+
+// Run DB init in background on server start
+ensureDatabaseInitialized().catch((err) => {
+  console.error('Initial background DB initialization failed:', err.message);
+});
+
+// Middleware to ensure DB tables exist before handling any API requests
+app.use('/api', async (req, res, next) => {
+  try {
+    await ensureDatabaseInitialized();
+    next();
+  } catch (err) {
+    res.status(500).json({ error: 'Database initialization error: ' + err.message });
+  }
+});
 
 // ----------------- API ROUTES -----------------
 

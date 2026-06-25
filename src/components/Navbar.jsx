@@ -30,7 +30,7 @@ export default function Navbar({ isAdmin, currentPage, onLoginClick, onLogout })
     <nav className={`navbar ${isScrolled ? 'scrolled' : ''}`}>
       <div className="nav-container">
         <a href="#home" className="nav-logo" onClick={handleLinkClick} style={{ display: 'flex', alignItems: 'center' }}>
-          <img src="/logo.png" alt="Viswam High School Logo" style={{ height: '52px', objectFit: 'contain', maxWidth: '100%' }} className="navbar-logo-img" />
+          <img src="/logo.png" alt="Viswam High School Logo" style={{ height: '68px', objectFit: 'contain', maxWidth: '100%' }} className="navbar-logo-img" />
         </a>
 
         {/* Desktop Menu */}
@@ -73,7 +73,7 @@ export default function Navbar({ isAdmin, currentPage, onLoginClick, onLogout })
       {mobileMenuOpen && (
         <div style={{
           position: 'absolute',
-          top: '80px',
+          top: '90px',
           left: 0,
           right: 0,
           backgroundColor: 'white',

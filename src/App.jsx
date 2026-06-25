@@ -733,7 +733,7 @@ export default function App() {
       />
 
       {/* Routed Page Sections */}
-      <main style={{ flexGrow: 1, marginTop: '80px' }}>
+      <main style={{ flexGrow: 1, marginTop: '90px' }}>
         
         {currentPage === 'home' && (
           <>

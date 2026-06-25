@@ -176,9 +176,9 @@ button {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 80px;
-  width: 90%;
-  max-width: var(--max-width);
+  height: 90px;
+  width: 95%;
+  max-width: 1440px;
   margin: 0 auto;
 }
 

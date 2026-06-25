@@ -78,14 +78,14 @@ async function initializeDatabase() {
         id TEXT PRIMARY KEY,
         src TEXT NOT NULL,
         title TEXT,
-        desc TEXT
+        "desc" TEXT
       );
 
       CREATE TABLE IF NOT EXISTS news (
         id TEXT PRIMARY KEY,
         date TEXT NOT NULL,
         title TEXT NOT NULL,
-        desc TEXT NOT NULL
+        "desc" TEXT NOT NULL
       );
 
       CREATE TABLE IF NOT EXISTS disclosures (
@@ -199,7 +199,7 @@ async function initializeDatabase() {
         { id: 'g4', src: '/palm_leaves.jpg', title: 'Bonfire Day Activities', desc: 'Students preparing leaves for the annual winter bonfire ceremony.' }
       ];
       for (const g of items) {
-        await pool.query('INSERT INTO gallery (id, src, title, desc) VALUES ($1, $2, $3, $4)', [g.id, g.src, g.title, g.desc]);
+        await pool.query('INSERT INTO gallery (id, src, title, "desc") VALUES ($1, $2, $3, $4)', [g.id, g.src, g.title, g.desc]);
       }
       console.log('Default photo gallery seeded.');
     }
@@ -213,7 +213,7 @@ async function initializeDatabase() {
         { id: 'n3', date: 'January 10, 2026', title: 'Annual winter Bonfire Ceremony', desc: 'Viswam School celebrated the harvest festival season with students assembling palm leaves for the traditional bonfire, alongside singing and cultural activities.' }
       ];
       for (const n of list) {
-        await pool.query('INSERT INTO news (id, date, title, desc) VALUES ($1, $2, $3, $4)', [n.id, n.date, n.title, n.desc]);
+        await pool.query('INSERT INTO news (id, date, title, "desc") VALUES ($1, $2, $3, $4)', [n.id, n.date, n.title, n.desc]);
       }
       console.log('Default news announcements seeded.');
     }
@@ -503,7 +503,7 @@ app.post('/api/content', authenticateJWT, async (req, res) => {
       await pool.query('DELETE FROM gallery');
       for (const g of gallery) {
         await pool.query(
-          'INSERT INTO gallery (id, src, title, desc) VALUES ($1, $2, $3, $4)',
+          'INSERT INTO gallery (id, src, title, "desc") VALUES ($1, $2, $3, $4)',
           [g.id, g.src, g.title || '', g.desc || '']
         );
       }
@@ -514,7 +514,7 @@ app.post('/api/content', authenticateJWT, async (req, res) => {
       await pool.query('DELETE FROM news');
       for (const n of newsList) {
         await pool.query(
-          'INSERT INTO news (id, date, title, desc) VALUES ($1, $2, $3, $4)',
+          'INSERT INTO news (id, date, title, "desc") VALUES ($1, $2, $3, $4)',
           [n.id, n.date, n.title, n.desc]
         );
       }

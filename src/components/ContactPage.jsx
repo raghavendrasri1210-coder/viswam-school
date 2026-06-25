@@ -65,24 +65,32 @@ export default function ContactPage({ data, isEditMode, onUpdateData }) {
       date: new Date().toLocaleString()
     };
 
-    try {
-      const existing = JSON.parse(localStorage.getItem('viswam_enquiries') || '[]');
-      const updated = [newEnquiry, ...existing];
-      localStorage.setItem('viswam_enquiries', JSON.stringify(updated));
-      
-      // Dispatch window event so App.jsx updates state in real-time
-      window.dispatchEvent(new Event('viswam_inquiry_added'));
-      
-      // Dispatch toast notification success
-      window.dispatchEvent(new CustomEvent('viswam_notification', {
-        detail: { message: 'Inquiry successfully submitted to the school desk!', type: 'success' }
-      }));
-    } catch (err) {
+    fetch('/api/enquiries', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(newEnquiry)
+    })
+    .then(async (res) => {
+      if (res.ok) {
+        // Dispatch window event so App.jsx updates state in real-time
+        window.dispatchEvent(new Event('viswam_inquiry_added'));
+        
+        window.dispatchEvent(new CustomEvent('viswam_notification', {
+          detail: { message: 'Inquiry successfully submitted to the school desk!', type: 'success' }
+        }));
+      } else {
+        const data = await res.json();
+        throw new Error(data.error || 'Failed to submit inquiry');
+      }
+    })
+    .catch((err) => {
       console.error('Error saving inquiry:', err);
       window.dispatchEvent(new CustomEvent('viswam_notification', {
-        detail: { message: 'Failed to submit inquiry due to a browser storage issue.', type: 'error' }
+        detail: { message: err.message || 'Failed to submit inquiry.', type: 'error' }
       }));
-    }
+    });
 
     // Success response - styled inside the page, no Chrome alert popups!
     setTimeout(() => {

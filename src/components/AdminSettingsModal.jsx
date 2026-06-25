@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X, Shield, Mail, Phone, Calendar, Trash2, Key, UserCheck, Inbox } from 'lucide-react';
 
-export default function AdminSettingsModal({ isOpen, onClose, inquiries, onUpdateInquiries, mode }) {
+export default function AdminSettingsModal({ isOpen, onClose, inquiries, onUpdateInquiries, onDeleteInquiry, onClearAllEnquiries, mode }) {
   // Password change states
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -22,13 +22,6 @@ export default function AdminSettingsModal({ isOpen, onClose, inquiries, onUpdat
     setPasswordError('');
     setPasswordSuccess('');
 
-    const storedPassword = localStorage.getItem('viswam_adminPassword') || 'viswam@2013';
-
-    if (currentPassword !== storedPassword) {
-      setPasswordError('The current password you entered is incorrect.');
-      return;
-    }
-
     if (newPassword.length < 6) {
       setPasswordError('New password must be at least 6 characters long.');
       return;
@@ -39,11 +32,37 @@ export default function AdminSettingsModal({ isOpen, onClose, inquiries, onUpdat
       return;
     }
 
-    localStorage.setItem('viswam_adminPassword', newPassword);
-    setPasswordSuccess('Password successfully updated!');
-    setCurrentPassword('');
-    setNewPassword('');
-    setConfirmPassword('');
+    const token = sessionStorage.getItem('viswam_token');
+    fetch('/api/auth/change-password', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        currentPassword,
+        newPassword
+      })
+    })
+    .then(async (res) => {
+      const data = await res.json();
+      if (res.ok) {
+        sessionStorage.setItem('viswam_token', data.token);
+        setPasswordSuccess('Password successfully updated!');
+        setCurrentPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
+        window.dispatchEvent(new CustomEvent('viswam_notification', {
+          detail: { message: 'Owner password successfully changed!', type: 'success' }
+        }));
+      } else {
+        setPasswordError(data.error || 'Failed to change password.');
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      setPasswordError('Connection error changing password.');
+    });
   };
 
   const handleEmailChangeSubmit = (e) => {
@@ -51,39 +70,63 @@ export default function AdminSettingsModal({ isOpen, onClose, inquiries, onUpdat
     setEmailError('');
     setEmailSuccess('');
 
-    const storedPassword = localStorage.getItem('viswam_adminPassword') || 'viswam@2013';
-
-    if (emailConfirmPassword !== storedPassword) {
-      setEmailError('Incorrect password validation.');
-      return;
-    }
-
     if (!newEmail.trim() || !newEmail.includes('@')) {
       setEmailError('Please enter a valid email address.');
       return;
     }
 
-    localStorage.setItem('viswam_adminEmail', newEmail.trim());
-    setEmailSuccess('Admin email successfully updated!');
-    setNewEmail('');
-    setEmailConfirmPassword('');
-    
-    window.dispatchEvent(new CustomEvent('viswam_notification', {
-      detail: { 
-        message: `Admin login email changed to: ${newEmail.trim()}. Use this email for your next login.`, 
-        type: 'success' 
+    const token = sessionStorage.getItem('viswam_token');
+    fetch('/api/auth/change-password', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        currentPassword: emailConfirmPassword,
+        newEmail: newEmail.trim()
+      })
+    })
+    .then(async (res) => {
+      const data = await res.json();
+      if (res.ok) {
+        sessionStorage.setItem('viswam_token', data.token);
+        setEmailSuccess('Admin email successfully updated!');
+        setNewEmail('');
+        setEmailConfirmPassword('');
+        
+        window.dispatchEvent(new CustomEvent('viswam_notification', {
+          detail: { 
+            message: `Admin login email changed to: ${data.email}. Use this email for your next login.`, 
+            type: 'success' 
+          }
+        }));
+      } else {
+        setEmailError(data.error || 'Failed to change admin email.');
       }
-    }));
+    })
+    .catch((err) => {
+      console.error(err);
+      setEmailError('Connection error changing email.');
+    });
   };
 
   const handleDeleteEnquiry = (id) => {
-    const updated = inquiries.filter((item) => item.id !== id);
-    onUpdateInquiries(updated);
+    if (onDeleteInquiry) {
+      onDeleteInquiry(id);
+    } else {
+      const updated = inquiries.filter((item) => item.id !== id);
+      onUpdateInquiries(updated);
+    }
   };
 
   const handleClearAllEnquiries = () => {
     if (window.confirm('Are you sure you want to delete all inquiries? This cannot be undone.')) {
-      onUpdateInquiries([]);
+      if (onClearAllEnquiries) {
+        onClearAllEnquiries();
+      } else {
+        onUpdateInquiries([]);
+      }
     }
   };
 

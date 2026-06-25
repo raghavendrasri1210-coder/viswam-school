@@ -15,6 +15,7 @@ export default function Leadership({ staffList, isEditMode, onUpdateStaff }) {
     const file = e.target.files[0];
     if (!file) return;
 
+    if (file.size > 1000000) {
       window.dispatchEvent(new CustomEvent('viswam_notification', {
         detail: { 
           message: "Image is too large. Please select a photo under 1MB to stay within storage limit.", 
@@ -22,6 +23,7 @@ export default function Leadership({ staffList, isEditMode, onUpdateStaff }) {
         }
       }));
       return;
+    }
 
     const reader = new FileReader();
     reader.onloadend = () => {
@@ -85,6 +87,7 @@ export default function Leadership({ staffList, isEditMode, onUpdateStaff }) {
   };
 
   const handleDeleteStaff = (id) => {
+    if (staffList.length <= 1) {
       window.dispatchEvent(new CustomEvent('viswam_notification', {
         detail: { 
           message: "You must keep at least one leadership profile (e.g. Principal).", 
@@ -92,6 +95,7 @@ export default function Leadership({ staffList, isEditMode, onUpdateStaff }) {
         }
       }));
       return;
+    }
     const updated = staffList.filter(s => s.id !== id);
     onUpdateStaff(updated);
   };

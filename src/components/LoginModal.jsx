@@ -12,16 +12,27 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }) {
     e.preventDefault();
     setError('');
 
-    // Check credentials loaded dynamically
-    const storedEmail = localStorage.getItem('viswam_adminEmail') || 'viswamschool2013@gmail.com';
-    const storedPassword = localStorage.getItem('viswam_adminPassword') || 'viswam@2013';
-
-    if (email.trim() === storedEmail && password === storedPassword) {
-      onLoginSuccess();
-      onClose();
-    } else {
-      setError('Invalid email or password. Please try again.');
-    }
+    fetch('/api/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ email, password })
+    })
+    .then(async (res) => {
+      const data = await res.json();
+      if (res.ok) {
+        sessionStorage.setItem('viswam_token', data.token);
+        onLoginSuccess(data.token);
+        onClose();
+      } else {
+        setError(data.error || 'Invalid email or password. Please try again.');
+      }
+    })
+    .catch((err) => {
+      console.error('Login error:', err);
+      setError('Backend server connection failure. Please try again later.');
+    });
   };
 
   return (

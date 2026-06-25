@@ -200,7 +200,8 @@ const DEFAULT_DISCLOSURES = {
 };
 
 export default function App() {
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [token, setToken] = useState(sessionStorage.getItem('viswam_token') || '');
+  const [isAdmin, setIsAdmin] = useState(sessionStorage.getItem('viswam_isAdmin') === 'true');
   const [isEditMode, setIsEditMode] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -269,20 +270,141 @@ export default function App() {
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
-  // Listen to parent enquiries submitted
-  useEffect(() => {
-    const handleInquiryAdded = () => {
-      const saved = localStorage.getItem('viswam_enquiries');
-      if (saved) {
-        setEnquiries(JSON.parse(saved));
-      }
+  // API helper with authentication token checking and automatic logout on 401/403
+  const fetchWithAuth = async (url, options = {}) => {
+    const activeToken = sessionStorage.getItem('viswam_token') || token;
+    const headers = {
+      'Content-Type': 'application/json',
+      ...options.headers,
     };
-    window.addEventListener('viswam_inquiry_added', handleInquiryAdded);
-    return () => window.removeEventListener('viswam_inquiry_added', handleInquiryAdded);
-  }, []);
+    if (activeToken) {
+      headers['Authorization'] = `Bearer ${activeToken}`;
+    }
+    try {
+      const res = await fetch(url, { ...options, headers });
+      if (res.status === 401 || res.status === 403) {
+        sessionStorage.removeItem('viswam_token');
+        sessionStorage.removeItem('viswam_isAdmin');
+        setToken('');
+        setIsAdmin(false);
+        setIsEditMode(false);
+        setIsSettingsOpen(false);
+        window.dispatchEvent(new CustomEvent('viswam_notification', {
+          detail: { message: 'Session expired or invalid. Access denied.', type: 'error' }
+        }));
+        throw new Error('Unauthorized');
+      }
+      return res;
+    } catch (err) {
+      if (err.message === 'Unauthorized') throw err;
+      console.error('API request failure:', err);
+      throw err;
+    }
+  };
 
-  // Load from LocalStorage on mount
-  useEffect(() => {
+  // Sync content payload with PostgreSQL Database
+  const syncContentToDatabase = async (
+    currentSchoolData = schoolData,
+    currentStaffList = staffList,
+    currentGallery = gallery,
+    currentNewsList = newsList,
+    currentDisclosures = disclosures,
+    currentHeroSlides = heroSlides,
+    currentStats = stats,
+    currentMilestones = milestones,
+    currentShowAdmissions = showAdmissionsAlert,
+    currentAdmissionsText = admissionsAlertText
+  ) => {
+    try {
+      const schoolDataPayload = {
+        ...currentSchoolData,
+        stats: JSON.stringify(currentStats),
+        milestones: JSON.stringify(currentMilestones),
+        showAdmissionsAlert: String(currentShowAdmissions),
+        admissionsAlertText: currentAdmissionsText
+      };
+
+      const payload = {
+        schoolData: schoolDataPayload,
+        staffList: currentStaffList,
+        gallery: currentGallery,
+        newsList: currentNewsList,
+        disclosures: currentDisclosures,
+        heroSlides: currentHeroSlides
+      };
+
+      const res = await fetchWithAuth('/api/content', {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      });
+
+      if (res.ok) {
+        window.dispatchEvent(new CustomEvent('viswam_notification', {
+          detail: { message: 'Website changes securely saved to Neon PostgreSQL database!', type: 'success' }
+        }));
+      }
+    } catch (err) {
+      console.error('Failed to sync content with database:', err);
+    }
+  };
+
+  // Load from backend Neon Database
+  const loadAllContent = async () => {
+    try {
+      const res = await fetch('/api/content');
+      if (!res.ok) throw new Error('Failed to fetch content');
+      const data = await res.json();
+      
+      const dbSchoolData = data.schoolData || {};
+      
+      if (dbSchoolData.stats) {
+        try {
+          setStats(JSON.parse(dbSchoolData.stats));
+        } catch (e) {
+          setStats(DEFAULT_STATS);
+        }
+      }
+      if (dbSchoolData.milestones) {
+        try {
+          setMilestones(JSON.parse(dbSchoolData.milestones));
+        } catch (e) {
+          setMilestones(DEFAULT_MILESTONES);
+        }
+      }
+      if (dbSchoolData.showAdmissionsAlert !== undefined) {
+        setShowAdmissionsAlert(dbSchoolData.showAdmissionsAlert === 'true');
+      }
+      if (dbSchoolData.admissionsAlertText) {
+        setAdmissionsAlertText(dbSchoolData.admissionsAlertText);
+      }
+
+      setSchoolData({
+        ...DEFAULT_SCHOOL_DATA,
+        ...dbSchoolData
+      });
+
+      if (data.staffList) setStaffList(data.staffList);
+      if (data.gallery) setGallery(data.gallery);
+      if (data.newsList) setNewsList(data.newsList);
+      if (data.heroSlides) setHeroSlides(data.heroSlides);
+      
+      if (data.disclosures) {
+        setDisclosures({
+          general: data.disclosures.general || DEFAULT_DISCLOSURES.general,
+          documents: data.disclosures.documents || DEFAULT_DISCLOSURES.documents,
+          academics: data.disclosures.academics || DEFAULT_DISCLOSURES.academics,
+          staff: data.disclosures.staff || DEFAULT_DISCLOSURES.staff,
+          infrastructure: data.disclosures.infrastructure || DEFAULT_DISCLOSURES.infrastructure,
+          committees: data.disclosures.committees || DEFAULT_DISCLOSURES.committees
+        });
+      }
+    } catch (err) {
+      console.warn('Backend load failed, falling back to localStorage defaults:', err.message);
+      loadFromLocalStorage();
+    }
+  };
+
+  const loadFromLocalStorage = () => {
     try {
       const savedSchoolData = localStorage.getItem('viswam_schoolData');
       const savedStaff = localStorage.getItem('viswam_staff');
@@ -292,68 +414,68 @@ export default function App() {
       const savedNews = localStorage.getItem('viswam_news');
       const savedDisclosures = localStorage.getItem('viswam_disclosures');
       const savedHeroSlides = localStorage.getItem('viswam_heroSlides');
-      const savedEnquiries = localStorage.getItem('viswam_enquiries');
       const savedAdmissionsShow = localStorage.getItem('viswam_showAdmissions');
       const savedAdmissionsText = localStorage.getItem('viswam_admissionsText');
-      const savedAdmin = sessionStorage.getItem('viswam_isAdmin');
 
-      if (savedSchoolData) {
-        const parsed = JSON.parse(savedSchoolData);
-        if (parsed.contactEmail === 'mail@gmail.com') {
-          parsed.contactEmail = 'viswamschool2013@gmail.com';
-        }
-        setSchoolData({ ...DEFAULT_SCHOOL_DATA, ...parsed });
-      }
-      
-      if (savedStaff) {
-        setStaffList(JSON.parse(savedStaff));
-      }
-
+      if (savedSchoolData) setSchoolData({ ...DEFAULT_SCHOOL_DATA, ...JSON.parse(savedSchoolData) });
+      if (savedStaff) setStaffList(JSON.parse(savedStaff));
       if (savedStats) setStats(JSON.parse(savedStats));
       if (savedMilestones) setMilestones(JSON.parse(savedMilestones));
       if (savedGallery) setGallery(JSON.parse(savedGallery));
       if (savedNews) setNewsList(JSON.parse(savedNews));
       if (savedHeroSlides) setHeroSlides(JSON.parse(savedHeroSlides));
-      if (savedEnquiries) setEnquiries(JSON.parse(savedEnquiries));
-      
-      if (savedAdmissionsShow !== null) {
-        setShowAdmissionsAlert(savedAdmissionsShow === 'true');
-      }
-      if (savedAdmissionsText !== null) {
-        setAdmissionsAlertText(savedAdmissionsText);
-      }
-
+      if (savedAdmissionsShow !== null) setShowAdmissionsAlert(savedAdmissionsShow === 'true');
+      if (savedAdmissionsText !== null) setAdmissionsAlertText(savedAdmissionsText);
       if (savedDisclosures) {
         const parsed = JSON.parse(savedDisclosures);
-        if (parsed.general) {
-          parsed.general = parsed.general.map(item => {
-            if (item.label === 'SCHOOL EMAIL ID' && item.value === 'mail@gmail.com') {
-              return { ...item, value: 'viswamschool2013@gmail.com' };
-            }
-            return item;
-          });
-        }
-
-        const merged = {
+        setDisclosures({
           general: parsed.general || DEFAULT_DISCLOSURES.general,
           documents: parsed.documents || DEFAULT_DISCLOSURES.documents,
           academics: parsed.academics || DEFAULT_DISCLOSURES.academics,
           staff: parsed.staff || DEFAULT_DISCLOSURES.staff,
           infrastructure: parsed.infrastructure || DEFAULT_DISCLOSURES.infrastructure,
           committees: parsed.committees || DEFAULT_DISCLOSURES.committees
-        };
-        setDisclosures(merged);
-      }
-
-      if (savedAdmin === 'true') {
-        setIsAdmin(true);
+        });
       }
     } catch (e) {
-      console.error('Error loading data from localStorage', e);
+      console.error(e);
     }
+  };
+
+  const loadEnquiries = async () => {
+    try {
+      const res = await fetchWithAuth('/api/enquiries');
+      if (res.ok) {
+        const data = await res.json();
+        setEnquiries(data);
+      }
+    } catch (err) {
+      console.error('Failed to load enquiries:', err);
+    }
+  };
+
+  useEffect(() => {
+    loadAllContent();
   }, []);
 
-  // Sync to LocalStorage helper
+  useEffect(() => {
+    if (isAdmin) {
+      loadEnquiries();
+    }
+  }, [isAdmin]);
+
+  // Listen to parent enquiries submitted
+  useEffect(() => {
+    const handleInquiryAdded = () => {
+      if (isAdmin) {
+        loadEnquiries();
+      }
+    };
+    window.addEventListener('viswam_inquiry_added', handleInquiryAdded);
+    return () => window.removeEventListener('viswam_inquiry_added', handleInquiryAdded);
+  }, [isAdmin]);
+
+  // Sync to LocalStorage helper (fallback)
   const saveStateToLocalStorage = (key, val) => {
     try {
       localStorage.setItem(`viswam_${key}`, JSON.stringify(val));
@@ -371,46 +493,49 @@ export default function App() {
   const handleUpdateStaff = (newStaff) => {
     setStaffList(newStaff);
     saveStateToLocalStorage('staff', newStaff);
+    syncContentToDatabase(schoolData, newStaff);
   };
 
   const handleUpdateStats = (newStats) => {
     setStats(newStats);
     saveStateToLocalStorage('stats', newStats);
+    syncContentToDatabase(schoolData, staffList, gallery, newsList, disclosures, heroSlides, newStats);
   };
 
   const handleUpdateMilestones = (newMilestones) => {
     setMilestones(newMilestones);
     saveStateToLocalStorage('milestones', newMilestones);
+    syncContentToDatabase(schoolData, staffList, gallery, newsList, disclosures, heroSlides, stats, newMilestones);
   };
 
   const handleUpdateGallery = (newGallery) => {
     setGallery(newGallery);
     saveStateToLocalStorage('gallery', newGallery);
+    syncContentToDatabase(schoolData, staffList, newGallery);
   };
 
   const handleUpdateNews = (newNews) => {
     setNewsList(newNews);
     saveStateToLocalStorage('news', newNews);
+    syncContentToDatabase(schoolData, staffList, gallery, newNews);
   };
 
   const handleUpdateDisclosures = (newDisclosures) => {
     setDisclosures(newDisclosures);
     saveStateToLocalStorage('disclosures', newDisclosures);
+    syncContentToDatabase(schoolData, staffList, gallery, newsList, newDisclosures);
   };
 
   const handleUpdateHeroSlides = (newSlides) => {
     setHeroSlides(newSlides);
     saveStateToLocalStorage('heroSlides', newSlides);
-  };
-
-  const handleUpdateEnquiries = (newEnquiries) => {
-    setEnquiries(newEnquiries);
-    saveStateToLocalStorage('enquiries', newEnquiries);
+    syncContentToDatabase(schoolData, staffList, gallery, newsList, disclosures, newSlides);
   };
 
   const handleToggleAdmissionsAlert = (show) => {
     setShowAdmissionsAlert(show);
     localStorage.setItem('viswam_showAdmissions', show ? 'true' : 'false');
+    syncContentToDatabase(schoolData, staffList, gallery, newsList, disclosures, heroSlides, stats, milestones, show);
   };
 
   const handleUpdateAdmissionsText = (text) => {
@@ -419,53 +544,105 @@ export default function App() {
   };
 
   // Auth functions
-  const handleLoginSuccess = () => {
+  const handleLoginSuccess = (newToken) => {
+    setToken(newToken);
     setIsAdmin(true);
     sessionStorage.setItem('viswam_isAdmin', 'true');
+    sessionStorage.setItem('viswam_token', newToken);
   };
 
   const handleLogout = () => {
+    setToken('');
     setIsAdmin(false);
     setIsEditMode(false);
     setIsSettingsOpen(false);
     sessionStorage.removeItem('viswam_isAdmin');
+    sessionStorage.removeItem('viswam_token');
+    window.dispatchEvent(new CustomEvent('viswam_notification', {
+      detail: { message: 'Successfully logged out.', type: 'success' }
+    }));
+  };
+
+  const handleDeleteEnquiry = async (id) => {
+    try {
+      const res = await fetchWithAuth(`/api/enquiries/${id}`, {
+        method: 'DELETE'
+      });
+      if (res.ok) {
+        setEnquiries(prev => prev.filter(item => item.id !== id));
+        window.dispatchEvent(new CustomEvent('viswam_notification', {
+          detail: { message: 'Inquiry successfully deleted.', type: 'success' }
+        }));
+      }
+    } catch (err) {
+      console.error('Failed to delete enquiry:', err);
+    }
+  };
+
+  const handleClearAllEnquiries = async () => {
+    try {
+      for (const item of enquiries) {
+        await fetchWithAuth(`/api/enquiries/${item.id}`, { method: 'DELETE' });
+      }
+      setEnquiries([]);
+      window.dispatchEvent(new CustomEvent('viswam_notification', {
+        detail: { message: 'All inquiry records successfully cleared.', type: 'success' }
+      }));
+    } catch (err) {
+      console.error('Failed to clear enquiries:', err);
+    }
+  };
+
+  const handleToggleEditMode = () => {
+    const nextEditMode = !isEditMode;
+    setIsEditMode(nextEditMode);
+    if (!nextEditMode) {
+      syncContentToDatabase();
+    }
   };
 
   // Reset to Defaults
-  const handleResetData = () => {
-    setSchoolData(DEFAULT_SCHOOL_DATA);
-    setStaffList(DEFAULT_STAFF);
-    setStats(DEFAULT_STATS);
-    setMilestones(DEFAULT_MILESTONES);
-    setGallery(DEFAULT_GALLERY);
-    setNewsList(DEFAULT_NEWS);
-    setDisclosures(DEFAULT_DISCLOSURES);
-    setHeroSlides(DEFAULT_HERO_SLIDES);
-    setEnquiries([]);
-    setShowAdmissionsAlert(true);
-    setAdmissionsAlertText('Admissions 2025 - 2026');
+  const handleResetData = async () => {
+    try {
+      const res = await fetchWithAuth('/api/auth/reset-data', {
+        method: 'POST'
+      });
+      if (res.ok) {
+        setSchoolData(DEFAULT_SCHOOL_DATA);
+        setStaffList(DEFAULT_STAFF);
+        setStats(DEFAULT_STATS);
+        setMilestones(DEFAULT_MILESTONES);
+        setGallery(DEFAULT_GALLERY);
+        setNewsList(DEFAULT_NEWS);
+        setDisclosures(DEFAULT_DISCLOSURES);
+        setHeroSlides(DEFAULT_HERO_SLIDES);
+        setEnquiries([]);
+        setShowAdmissionsAlert(true);
+        setAdmissionsAlertText('Admissions 2025 - 2026');
 
-    localStorage.removeItem('viswam_schoolData');
-    localStorage.removeItem('viswam_staff');
-    localStorage.removeItem('viswam_stats');
-    localStorage.removeItem('viswam_milestones');
-    localStorage.removeItem('viswam_gallery');
-    localStorage.removeItem('viswam_news');
-    localStorage.removeItem('viswam_disclosures');
-    localStorage.removeItem('viswam_heroSlides');
-    localStorage.removeItem('viswam_enquiries');
-    localStorage.removeItem('viswam_showAdmissions');
-    localStorage.removeItem('viswam_admissionsText');
-    localStorage.removeItem('viswam_adminEmail');
-    localStorage.removeItem('viswam_adminPassword');
-    setIsEditMode(false);
-    
-    window.dispatchEvent(new CustomEvent('viswam_notification', {
-      detail: { 
-        message: "Website content and security credentials successfully reset back to default parameters!", 
-        type: 'success' 
+        localStorage.removeItem('viswam_schoolData');
+        localStorage.removeItem('viswam_staff');
+        localStorage.removeItem('viswam_stats');
+        localStorage.removeItem('viswam_milestones');
+        localStorage.removeItem('viswam_gallery');
+        localStorage.removeItem('viswam_news');
+        localStorage.removeItem('viswam_disclosures');
+        localStorage.removeItem('viswam_heroSlides');
+        localStorage.removeItem('viswam_enquiries');
+        localStorage.removeItem('viswam_showAdmissions');
+        localStorage.removeItem('viswam_admissionsText');
+        setIsEditMode(false);
+        
+        window.dispatchEvent(new CustomEvent('viswam_notification', {
+          detail: { 
+            message: "Website content and security credentials successfully reset back to default parameters!", 
+            type: 'success' 
+          }
+        }));
       }
-    }));
+    } catch (err) {
+      console.error('Failed to reset content parameters:', err);
+    }
   };
 
   return (
@@ -537,7 +714,7 @@ export default function App() {
       {isAdmin && (
         <AdminPanel
           isEditMode={isEditMode}
-          onToggleEditMode={() => setIsEditMode(!isEditMode)}
+          onToggleEditMode={handleToggleEditMode}
           onResetData={handleResetData}
           onLogout={handleLogout}
           showAdmissionsAlert={showAdmissionsAlert}
@@ -775,6 +952,8 @@ export default function App() {
         onClose={() => setIsSettingsOpen(false)}
         inquiries={enquiries}
         onUpdateInquiries={handleUpdateEnquiries}
+        onDeleteInquiry={handleDeleteEnquiry}
+        onClearAllEnquiries={handleClearAllEnquiries}
         mode={settingsModalMode}
       />
 

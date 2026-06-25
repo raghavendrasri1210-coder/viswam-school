@@ -951,7 +951,7 @@ export default function App() {
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
         inquiries={enquiries}
-        onUpdateInquiries={handleUpdateEnquiries}
+        onUpdateInquiries={setEnquiries}
         onDeleteInquiry={handleDeleteEnquiry}
         onClearAllEnquiries={handleClearAllEnquiries}
         mode={settingsModalMode}

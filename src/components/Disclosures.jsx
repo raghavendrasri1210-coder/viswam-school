@@ -169,7 +169,8 @@ export default function Disclosures({ disclosures, isEditMode, onUpdateDisclosur
         overflow: 'hidden',
         animation: 'fadeIn 0.3s ease-out'
       }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
           <thead>
             <tr style={{ backgroundColor: 'var(--bg-main)', borderBottom: '2px solid var(--border)' }}>
               <th style={{ padding: '16px 20px', fontWeight: '700', width: '80px' }}>SL NO.</th>
@@ -292,6 +293,7 @@ export default function Disclosures({ disclosures, isEditMode, onUpdateDisclosur
             ))}
           </tbody>
         </table>
+        </div>
       </div>
     );
   };
@@ -414,7 +416,8 @@ export default function Disclosures({ disclosures, isEditMode, onUpdateDisclosur
             overflow: 'hidden',
             animation: 'fadeIn 0.3s ease-out'
           }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
               <thead>
                 <tr style={{ backgroundColor: 'var(--bg-main)', borderBottom: '2px solid var(--border)' }}>
                   <th style={{ padding: '16px 20px', fontWeight: '700', width: '80px' }}>SL NO.</th>
@@ -469,6 +472,7 @@ export default function Disclosures({ disclosures, isEditMode, onUpdateDisclosur
                 ))}
               </tbody>
             </table>
+            </div>
           </div>
         )}
 
@@ -482,7 +486,8 @@ export default function Disclosures({ disclosures, isEditMode, onUpdateDisclosur
             overflow: 'hidden',
             animation: 'fadeIn 0.3s ease-out'
           }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
               <thead>
                 <tr style={{ backgroundColor: 'var(--bg-main)', borderBottom: '2px solid var(--border)' }}>
                   <th style={{ padding: '16px 20px', fontWeight: '700', width: '80px' }}>SL NO.</th>
@@ -584,6 +589,7 @@ export default function Disclosures({ disclosures, isEditMode, onUpdateDisclosur
                 ))}
               </tbody>
             </table>
+            </div>
             <div style={{ padding: '20px', backgroundColor: 'var(--bg-main)', borderTop: '1px solid var(--border)', fontSize: '0.82rem', color: 'var(--text-light)' }}>
               <strong>NOTE:</strong> THE SCHOOLS NEED TO UPLOAD THE SELF-ATTESTED COPIES OF THE ABOVE LISTED DOCUMENTS BY CHAIRMAN/ MANAGER/ SECRETARY AND PRINCIPAL. IN CASE, IT IS NOTICED AT LATER STAGE THAT UPLOADED DOCUMENTS ARE NOT GENUINE THEN SCHOOL SHALL BE LIABLE FOR ACTION AS PER NORMS.
             </div>
@@ -600,7 +606,8 @@ export default function Disclosures({ disclosures, isEditMode, onUpdateDisclosur
             overflow: 'hidden',
             animation: 'fadeIn 0.3s ease-out'
           }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
               <thead>
                 <tr style={{ backgroundColor: 'var(--bg-main)', borderBottom: '2px solid var(--border)' }}>
                   <th style={{ padding: '16px 20px', fontWeight: '700', width: '80px' }}>SL NO.</th>
@@ -702,6 +709,7 @@ export default function Disclosures({ disclosures, isEditMode, onUpdateDisclosur
                 ))}
               </tbody>
             </table>
+            </div>
           </div>
         )}
 

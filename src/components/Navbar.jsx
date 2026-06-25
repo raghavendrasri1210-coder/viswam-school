@@ -29,12 +29,8 @@ export default function Navbar({ isAdmin, currentPage, onLoginClick, onLogout })
   return (
     <nav className={`navbar ${isScrolled ? 'scrolled' : ''}`}>
       <div className="nav-container">
-        <a href="#home" className="nav-logo" onClick={handleLinkClick} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <img src="/logo.png" alt="Viswam High School Logo" style={{ height: '48px', objectFit: 'contain' }} />
-          <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'left' }}>
-            <span style={{ fontSize: '1.2rem', fontWeight: '800', lineHeight: 1.1, color: 'var(--primary)' }}>VISWAM</span>
-            <span style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--secondary)', letterSpacing: '0.5px' }}>HIGH SCHOOL</span>
-          </div>
+        <a href="#home" className="nav-logo" onClick={handleLinkClick} style={{ display: 'flex', alignItems: 'center' }}>
+          <img src="/logo.png" alt="Viswam High School Logo" style={{ height: '40px', objectFit: 'contain', maxWidth: '100%' }} className="navbar-logo-img" />
         </a>
 
         {/* Desktop Menu */}
@@ -49,7 +45,7 @@ export default function Navbar({ isAdmin, currentPage, onLoginClick, onLogout })
 
         <div className="nav-buttons">
           {isAdmin ? (
-            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+            <div className="desktop-only-buttons">
               <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--success)', fontWeight: '600', fontSize: '0.9rem' }}>
                 <Shield size={16} />
                 <span>Admin</span>
@@ -59,13 +55,15 @@ export default function Navbar({ isAdmin, currentPage, onLoginClick, onLogout })
               </button>
             </div>
           ) : (
-            <button className="btn btn-primary" onClick={onLoginClick} style={{ padding: '8px 16px', fontSize: '0.85rem' }}>
-              <LogIn size={14} />
-              <span>Owner Login</span>
-            </button>
+            <div className="desktop-only-buttons">
+              <button className="btn btn-primary" onClick={onLoginClick} style={{ padding: '8px 16px', fontSize: '0.85rem' }}>
+                <LogIn size={14} />
+                <span>Owner Login</span>
+              </button>
+            </div>
           )}
 
-          <button className="mobile-menu-toggle" onClick={toggleMobileMenu}>
+          <button className="mobile-menu-toggle" onClick={toggleMobileMenu} aria-label="Toggle menu">
             {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
@@ -93,7 +91,17 @@ export default function Navbar({ isAdmin, currentPage, onLoginClick, onLogout })
           <a href="#news" style={{ fontWeight: '600', padding: '5px 0', color: currentPage === 'news' ? 'var(--accent)' : 'inherit' }} onClick={handleLinkClick}>News & Events</a>
           <a href="#gallery" style={{ fontWeight: '600', padding: '5px 0', color: currentPage === 'gallery' ? 'var(--accent)' : 'inherit' }} onClick={handleLinkClick}>Gallery</a>
           <a href="#contact" style={{ fontWeight: '600', padding: '5px 0', color: currentPage === 'contact' ? 'var(--accent)' : 'inherit' }} onClick={handleLinkClick}>Contact</a>
-          {!isAdmin && (
+          {isAdmin ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '10px', paddingTop: '15px', borderTop: '1px solid var(--border)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--success)', fontWeight: '700', fontSize: '0.9rem', justifyContent: 'center' }}>
+                <Shield size={16} />
+                <span>Admin Mode Active</span>
+              </div>
+              <button className="btn btn-outline" onClick={() => { setMobileMenuOpen(false); onLogout(); }} style={{ width: '100%' }}>
+                Logout
+              </button>
+            </div>
+          ) : (
             <button className="btn btn-primary" onClick={() => { setMobileMenuOpen(false); onLoginClick(); }} style={{ width: '100%', marginTop: '10px' }}>
               <LogIn size={16} />
               <span>Owner Login</span>

@@ -20,12 +20,8 @@ export default function Footer({ data, isEditMode, onUpdateData }) {
         {/* Brand column */}
         <div className="footer-col">
           <div className="footer-brand">
-            <div className="footer-logo" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <img src="/logo.png" alt="Viswam School Logo" style={{ height: '40px', objectFit: 'contain' }} />
-              <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'left' }}>
-                <span style={{ fontSize: '1.1rem', fontWeight: '800', lineHeight: 1.1 }}>VISWAM</span>
-                <span style={{ fontSize: '0.7rem', fontWeight: '600', color: 'var(--secondary)' }}>HIGH SCHOOL</span>
-              </div>
+            <div className="footer-logo" style={{ display: 'flex', alignItems: 'center' }}>
+              <img src="/logo.png" alt="Viswam School Logo" style={{ height: '40px', objectFit: 'contain', maxWidth: '100%' }} />
             </div>
             <p className="footer-desc">
               Providing holistic education that blends South Indian cultural values with world-class learning methods. Est. 2013.

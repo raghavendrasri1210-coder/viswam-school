@@ -229,6 +229,18 @@ button {
   gap: 12px;
 }
 
+.desktop-only-buttons {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+@media (max-width: 768px) {
+  .desktop-only-buttons {
+    display: none !important;
+  }
+}
+
 .btn {
   display: inline-flex;
   align-items: center;
@@ -276,8 +288,19 @@ button {
 
 .mobile-menu-toggle {
   display: none;
-  font-size: 1.5rem;
+  background: transparent;
+  border: none;
   color: var(--text-dark);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: var(--radius-sm);
+  transition: var(--transition);
+  align-items: center;
+  justify-content: center;
+}
+
+.mobile-menu-toggle:hover {
+  background-color: rgba(0, 0, 0, 0.05);
 }
 
 /* Hero Section */
@@ -1326,7 +1349,7 @@ button {
     display: none;
   }
   .mobile-menu-toggle {
-    display: block;
+    display: flex !important;
   }
   .hero-section {
     height: auto;

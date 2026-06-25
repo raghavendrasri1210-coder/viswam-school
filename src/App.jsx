@@ -36,7 +36,8 @@ const DEFAULT_SCHOOL_DATA = {
   principalBio: 'Leading our school family with a dedication to bringing out the absolute best in South Indian moral values and world-class educational techniques for every child.',
   
   careersDesc: 'We are always looking for passionate, experienced, and dedicated teaching professionals to join the Viswam High School family.',
-  careersOpenings: 'Trained Graduate Teachers (TGT) - Science & Mathematics\nPost Graduate Teachers (PGT) - English & Social Sciences\nPrimary Teachers (PRT) & Kindergarten Instructors'
+  careersOpenings: 'Trained Graduate Teachers (TGT) - Science & Mathematics\nPost Graduate Teachers (PGT) - English & Social Sciences\nPrimary Teachers (PRT) & Kindergarten Instructors',
+  careersNote: 'Please send your updated resume, academic credentials, and cover letter directly to our official administrative email address: viswamschool2013@gmail.com. Our administrative reviewing desk will evaluate submissions and contact shortlisted candidates for interviews shortly.'
 };
 
 const DEFAULT_STAFF = [

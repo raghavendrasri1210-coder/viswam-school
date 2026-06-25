@@ -1491,6 +1491,13 @@ button {
     font-size: 0.85rem !important;
   }
 
+  .hero-slide {
+    background-size: contain !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+    background-color: #0c111d !important;
+  }
+
   .leadership-role-card {
     grid-template-columns: 1fr;
     padding: 20px;

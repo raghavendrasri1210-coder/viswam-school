@@ -75,6 +75,7 @@ export default function InfoModal({ isOpen, onClose, type, isEditMode, schoolDat
       case 'careers':
         const desc = schoolData?.careersDesc || 'We are always looking for passionate, experienced, and dedicated teaching professionals to join the Viswam High School family.';
         const openings = schoolData?.careersOpenings || 'Trained Graduate Teachers (TGT) - Science & Mathematics\nPost Graduate Teachers (PGT) - English & Social Sciences\nPrimary Teachers (PRT) & Kindergarten Instructors';
+        const note = schoolData?.careersNote || 'Please send your updated resume, academic credentials, and cover letter directly to our official administrative email address: viswamschool2013@gmail.com. Our administrative reviewing desk will evaluate submissions and contact shortlisted candidates for interviews shortly.';
 
         return {
           icon: <Briefcase size={24} style={{ color: 'var(--primary)' }} />,
@@ -102,9 +103,17 @@ export default function InfoModal({ isOpen, onClose, type, isEditMode, schoolDat
                   placeholder="Enter active job openings..."
                 />
               </div>
-              <p style={{ fontSize: '0.8rem', color: 'var(--text-light)', margin: 0 }}>
-                Note: Candidates will be instructed to email their applications to the configured administrative email address ({schoolData?.contactEmail || 'viswamschool2013@gmail.com'}).
-              </p>
+              <div>
+                <label className="form-label" style={{ fontWeight: '700', color: 'var(--text-dark)' }}>How to Apply Instructions / Note</label>
+                <textarea
+                  className="form-input"
+                  rows={3}
+                  value={note}
+                  onChange={(e) => onUpdateSchoolData('careersNote', e.target.value)}
+                  style={{ width: '100%', fontFamily: 'inherit', marginTop: '5px', padding: '8px' }}
+                  placeholder="Enter application guidelines..."
+                />
+              </div>
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', fontSize: '0.9rem', lineHeight: '1.6', color: 'var(--text-main)' }}>
@@ -116,8 +125,7 @@ export default function InfoModal({ isOpen, onClose, type, isEditMode, schoolDat
                 ))}
               </ul>
               <h5 style={{ fontWeight: '700', color: 'var(--text-dark)', margin: '5px 0 0 0' }}>How to Apply</h5>
-              <p>Please send your updated resume, academic credentials, and cover letter directly to our official administrative email address: <a href={`mailto:${schoolData?.contactEmail || 'viswamschool2013@gmail.com'}`} style={{ color: 'var(--primary)', fontWeight: '700', textDecoration: 'underline' }}>{schoolData?.contactEmail || 'viswamschool2013@gmail.com'}</a>.</p>
-              <p>Our administrative reviewing desk will evaluate submissions and contact shortlisted candidates for interviews shortly.</p>
+              <p style={{ whiteSpace: 'pre-line' }}>{note}</p>
             </div>
           )
         };
